@@ -1,35 +1,38 @@
+// src/App.jsx
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import SignupForm from "./components/SignupForm";
-import Login from "./components/Login"; // make sure this file exists
-import "./App.css";
+import { Routes, Route } from "react-router-dom";
+import SignupForm from "@/components/SignupForm";
+import Login from "@/components/Login";
+import Dashboard from "./pages/Dashboard";
+import ApplyLeave from "./pages/ApplyLeave"; // import ApplyLeave page
+import AuthLayout from "@/layouts/AuthLayout";
+import MainLayout from "@/layouts/MainLayout";
+import LeaveHistoryTimeline from "./pages/LeaveHistoryTimeline"; // import LeaveHistoryTable page
+import LeaveHistoryTable from "./pages/LeaveHistoryTable";
+import NotificationsPage from "./pages/NotificationsPage";
+import Profile from "./pages/Profile";
+// import ProfileSettingsPage from "./pages/ProfileSettingsPage";
 
-function App() {
+
+export default function App() {
   return (
-    <Router>
-      <div className="app">
-        <div className="custom-header">
-          <div className="left-section">
-            <img src="" alt="icon" />
-            <span>Hostel Leave Management</span>
-          </div>
+    <Routes>
+      {/* Pages WITH header + bg */}
+      <Route element={<AuthLayout />}>
+        <Route path="/" element={<SignupForm />} />
+        <Route path="/login" element={<Login />} />
+      </Route>
 
-          <div className="right-section">
-            <img
-              src="https://cdn-icons-png.flaticon.com/512/219/219986.png"
-              alt="Student Icon"
-            />
-            <span>Student Portal</span>
-          </div>
-        </div>
-
-        <Routes>
-          <Route path="/" element={<SignupForm />} />
-          <Route path="/login" element={<Login />} />
-        </Routes>
-      </div>
-    </Router>
+      {/* Pages WITHOUT header + bg */}
+      <Route path="/dashboard" element={<MainLayout />}>
+        <Route index element={<Dashboard />} />
+        <Route path="applyleave" element={<ApplyLeave />} /> {/* nested route */}
+        <Route path="timeline" element={<LeaveHistoryTimeline />} /> {/* nested route */}
+        <Route path="leavehistory" element={<LeaveHistoryTable />} /> {/* nested route */}
+        <Route path="notifications" element={<NotificationsPage />} />
+        <Route path="profile" element={<Profile />} />
+        {/* <Route path="profile" element={<ProfileSettingsPage />} /> */}
+      </Route>
+    </Routes>
   );
 }
-
-export default App;
