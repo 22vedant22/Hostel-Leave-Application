@@ -12,7 +12,7 @@ const Topbar = () => {
 
         <div className="text-2xl font-bold text-teal-700 flex items-center gap-2">
           <SiGooglehome className="w-6 h-6" />
-          DormDash
+          Hostel Leave Application
         </div>
 
         <button
