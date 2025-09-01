@@ -35,14 +35,20 @@ const GoogleLogin = () => {
       if (!response.ok){
         return showToast("error", data.message);
       } 
-
+ // ✅ Save user in Redux
       dispatch(setUser(data.user));
-      navigate("/dashboard");
+      // ✅ Navigate based on role
+      if (data.user.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/dashboard");
+      }
+
       showToast("success", data.message);
     } catch (err) {
-      showToast("error", err.message || "Google login failed");
+      showToast("error", err.message || "Server error");
     }
-  };
+  }
 
   return (
     <Button variant="outline" className="w-full flex items-center justify-center gap-2" onClick={handleLogin}>

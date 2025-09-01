@@ -109,9 +109,9 @@ export default function NotificationsPage() {
 
           <div className="mt-5 flex-1 overflow-y-auto">
             <Tabs value={tab} onValueChange={setTab} className="flex flex-col h-full">
-              <TabsList className="grid grid-cols-5 rounded-2xl">
+              <TabsList className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 rounded-2xl gap-2">
                 {statusTabs.map((s) => (
-                  <TabsTrigger key={s} value={s} className="rounded-xl data-[state=active]:shadow">{s}</TabsTrigger>
+                  <TabsTrigger key={s} value={s} className="rounded-xl data-[state=active]:shadow text-sm sm:text-base">{s}</TabsTrigger>
                 ))}
               </TabsList>
 

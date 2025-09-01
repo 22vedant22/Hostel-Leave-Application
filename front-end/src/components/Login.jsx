@@ -23,6 +23,7 @@ const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  // ✅ Form validation schema
   const formSchema = z.object({
     email: z.string().email(),
     password: z.string().min(6, "Password is required"),
@@ -30,13 +31,14 @@ const Login = () => {
 
   const form = useForm({
     resolver: zodResolver(formSchema),
-    defaultValues: { 
-      email: "", 
-      password: "" ,
+    defaultValues: {
+      email: "",
+      password: "",
     },
   });
 
-  async  function onSubmit(values){
+  // ✅ Handle submit
+  async function onSubmit(values) {
     try {
       const response = await fetch(`${getEnv("VITE_API_URL")}/auth/login`, {
         method: "POST",
@@ -51,13 +53,20 @@ const Login = () => {
         return showToast("error", data.message);
       }
 
+      // ✅ Save user in Redux
       dispatch(setUser(data.user));
-      navigate("/dashboard");
+      // ✅ Navigate based on role
+      if (data.user.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/dashboard");
+      }
+
       showToast("success", data.message);
     } catch (err) {
       showToast("error", err.message || "Server error");
     }
-  };
+  }
 
   return (
     <div>
@@ -68,6 +77,7 @@ const Login = () => {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
+            {/* Email Field */}
             <FormField
               control={form.control}
               name="email"
@@ -82,6 +92,7 @@ const Login = () => {
               )}
             />
 
+            {/* Password Field */}
             <FormField
               control={form.control}
               name="password"
@@ -96,6 +107,7 @@ const Login = () => {
               )}
             />
 
+            {/* Remember me + Forgot password */}
             <div className="flex justify-between text-xs mb-5">
               <label className="flex items-center">
                 <input type="checkbox" className="mr-1" /> Remember me
@@ -105,6 +117,7 @@ const Login = () => {
               </a>
             </div>
 
+            {/* Submit Button */}
             <button
               type="submit"
               className="w-full py-2 bg-[#125c60] text-white rounded-md font-bold mb-4 hover:bg-[#0f4a4d] transition"
@@ -114,6 +127,7 @@ const Login = () => {
           </form>
         </Form>
 
+        {/* Signup Link */}
         <p className="text-xs mb-4">
           New to DormDash?{" "}
           <Link to="/" className="text-blue-600 hover:underline">
@@ -121,10 +135,12 @@ const Login = () => {
           </Link>
         </p>
 
+        {/* OR Divider */}
         <div className="flex items-center justify-center text-xs text-gray-600 mb-4">
           <span>OR</span>
         </div>
 
+        {/* Google Login */}
         <GoogleLogin />
       </div>
     </div>

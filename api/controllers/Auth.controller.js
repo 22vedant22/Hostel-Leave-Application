@@ -1,251 +1,286 @@
-// import bcryptjs from "bcryptjs";
-// import jwt from "jsonwebtoken";
-// import User from "../models/user.model.js";
-// import { handleError } from "../helpers/handleError.js";
 
-// // Utility function to generate JWT
-// const generateToken = (user) => {
-//   return jwt.sign(
-//     { _id: user._id, name: user.name, email: user.email },
-//     process.env.JWT_SECRET,
-//     { expiresIn: "7d" }
-//   );
-// };
+// import { handleError } from "../helpers/handleError.js"
+// import User from "../models/user.model.js"
+// import bcryptjs from "bcryptjs"
+// import jwt from 'jsonwebtoken';
+// const { JsonWebTokenError } = jwt;
 
-// // --------------------- REGISTER ---------------------
 // export const Register = async (req, res, next) => {
 //   try {
-//     const { name, email, phone, password } = req.body;
-
-//     // Check if user already exists
-//     const existingUser = await User.findOne({ email });
-//     if (existingUser) return next(handleError(409, "User already registered"));
-
-//     // Hash password asynchronously
-//     const hashedPassword = await bcryptjs.hash(password, 10);
-
-//     // Create and save user
-//     const user = new User({ name, email, phone, password: hashedPassword });
-//     await user.save();
-
-//     // Generate JWT
-//     const token = generateToken(user);
-
-//     res.status(201).json({
-//       success: true,
-//       message: "User registered successfully",
-//       user: { _id: user._id, name: user.name, email: user.email, phone: user.phone },
-//       token,
-//     });
-//   } catch (error) {
-//     next(handleError(500, error.message));
-//   }
-// };
-
-// // --------------------- LOGIN ---------------------
-// export const Login = async (req, res, next) => {
-//   try {
-//     const { email, password } = req.body;
-
-//     // Find user
-//     const user = await User.findOne({ email });
-//     if (!user) return next(handleError(404, "User not found"));
-
-//     // Compare password
-//     const isMatch = await bcryptjs.compare(password, user.password);
-//     if (!isMatch) return next(handleError(401, "Invalid credentials"));
-
-//     // Generate JWT
-//     const token = generateToken(user);
-
-//     // Set cookie
-//     res.cookie("access_token", token, {
-//       httpOnly: true,
-//       secure: process.env.NODE_ENV === "production",
-//       sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-//       path: "/",
-//     });
-
-//     const userData = user.toObject();
-//     delete userData.password;
-
-//     res.status(200).json({
-//       success: true,
-//       user: userData,
-//       token,
-//       message: "User logged in successfully",
-//     });
-//   } catch (error) {
-//     next(handleError(500, error.message));
-//   }
-// };
-
-// // --------------------- GOOGLE LOGIN ---------------------
-// export const GoogleLogin = async (req, res, next) => {
-//   try {
-//     const { name, email } = req.body;
-
-//     let user = await User.findOne({ email });
-
-//     // Create user if not exists
-//     if (!user) {
-//       const randomPassword = Math.random().toString(36).slice(-8);
-//       const hashedPassword = await bcryptjs.hash(randomPassword, 10);
-//       user = await new User({ name, email, password: hashedPassword }).save();
+//     const { name, email, phone, password } = req.body
+//     const checkuser = await User.findOne({ email })
+//     if (checkuser) {
+//       return next(handleError(409, 'User already registered'));
 //     }
 
-//     // Generate JWT
-//     const token = generateToken(user);
+//     const hashedPassword = await bcryptjs.hash(password, 10)
 
-//     // Set cookie
+//     const user = new User({
+//       name, email, phone, password: hashedPassword
+//     })
+//     await user.save()
+//     res.status(200).json({
+//       success: true,
+//       user: newUser,
+//       token,
+//       message: 'Resistration successfull,'
+//     })
+//   } catch (error) {
+//     next(handleError(500, error.message))
+//   }
+// }
+
+// export const Login = async (req, res, next) => {
+//   try {
+//     const { email, password } = req.body
+//     const user = await User.findOne({ email })
+//     if (!user) {
+//       return next(handleError(404, 'Invalid login credential'));
+//     }
+//     const hashedPassword = user.password
+
+//     const comparePassword = await bcryptjs.compare(password, hashedPassword)
+//     if (!comparePassword) {
+//       return next(handleError(404, 'Invalid login credential'));
+//     }
+
+//     const token = jwt.sign({
+//       _id: user._id,
+//       name: user.name,
+//       email: user.email,
+//       avatar: user.avatar,
+//       role: user.role,
+//     }, process.env.JWT_SECRET, { expiresIn: "7d" })
 //     res.cookie("access_token", token, {
 //       httpOnly: true,
-//       secure: process.env.NODE_ENV === "production",
-//       sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+//       secure: process.env.NODE_ENV === "production",       // false in dev
+//       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
 //       path: "/",
+//       maxAge: 7 * 24 * 60 * 60 * 1000,
 //     });
+//     const newUser = user.toObject({ getters: true })
+//     delete newUser.password
+//     res.status(200).json({
+//       success: true,
+//       user: newUser,
+//       token,
+//       message: 'Login successfull'
+//     })
+//   } catch (err) {
+//     next(handleError(500, err.message))
+//   }
+// }
 
-//     const userData = user.toObject();
-//     delete userData.password;
+// export const GoogleLogin = async (req, res, next) => {
+//   try {
+//     const { name, email, avatar } = req.body
+//     let user
+//     user = await User.findOne({ email })
+//     if (!user) {
+//       const password = Math.random().toString()
+//       const hashedPassword = bcryptjs.hashSync(password)
+//       const newUser = new User({
+//         name, email, password: hashedPassword, avatar
+//       })
+//       user = await newUser.save()
+//     }
+
+
+//     const token = jwt.sign({
+//       _id: user._id,
+//       name: user.name,
+//       email: user.email,
+//       avatar: user.avatar,
+//       role: user.role,
+//     }, process.env.JWT_SECRET, { expiresIn: "7d" })
+//     res.cookie("access_token", token, {
+//       httpOnly: true,
+//       secure: process.env.NODE_ENV === "production",       // false in dev
+//       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+//       path: "/",
+//       maxAge: 7 * 24 * 60 * 60 * 1000,
+//     });
+//     const newUser = user.toObject({ getters: true })
+//     delete newUser.password
+//     res.status(200).json({
+//       success: true,
+//       user: newUser,
+//       token,
+//       message: 'Login successfull'
+//     })
+//   } catch (err) {
+//     next(handleError(500, err.message))
+//   }
+// }
+
+// export const Logout = async (req, res, next) => {
+//   try {
+//     res.clearCookie('access_token', {
+//       httpOnly: true,
+//       secure: process.env.NODE_ENV === 'production',
+//       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+//       path: "/"
+//     })
 
 //     res.status(200).json({
 //       success: true,
-//       user: userData,
-//       token,
-//       message: "Login successful",
-//     });
-//   } catch (error) {
-//     next(handleError(500, error.message));
+//       message: 'Logout successfull'
+//     })
+//   } catch (err) {
+//     next(handleError(500, err.message))
 //   }
-// };
+// }
 
+import { handleError } from "../helpers/handleError.js";
+import User from "../models/user.model.js";
+import bcryptjs from "bcryptjs";
+import jwt from "jsonwebtoken";
 
-import e from "express";
-import { handleError } from "../helpers/handleError.js"
-import User from "../models/user.model.js"
-import bcryptjs from "bcryptjs"
-import jwt from 'jsonwebtoken';
-const { JsonWebTokenError } = jwt;
+// Utility to generate JWT
+const generateToken = (user) => {
+  return jwt.sign(
+    {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      avatar: user.avatar,
+      role: user.role,
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: "7d" }
+  );
+};
 
+// --------------------- REGISTER ---------------------
 export const Register = async (req, res, next) => {
   try {
-    const { name, email, phone, password } = req.body
-    const checkuser = await User.findOne({ email })
-    if (checkuser) {
-      return next(handleError(409, 'User already registered'));
+    const { name, email, phone, password } = req.body;
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return next(handleError(409, "User already registered"));
     }
 
-    const hashedPassword = await bcryptjs.hash(password, 10)
+    const hashedPassword = await bcryptjs.hash(password, 10);
 
     const user = new User({
-      name, email, phone, password: hashedPassword
-    })
-    await user.save()
-    res.status(200).json({
-      success: true,
-      message: 'Resistration successfull,'
-    })
-  } catch (error) {
-    next(handleError(500, error.message))
-  }
-}
+      name,
+      email,
+      phone,
+      password: hashedPassword,
+    });
 
+    await user.save();
+
+    const token = generateToken(user);
+
+    const userData = user.toObject({ getters: true });
+    delete userData.password;
+
+    res.status(201).json({
+      success: true,
+      user: userData,
+      token,
+      message: "Registration successful",
+    });
+  } catch (error) {
+    next(handleError(500, error.message));
+  }
+};
+
+// --------------------- LOGIN ---------------------
 export const Login = async (req, res, next) => {
   try {
-    const { email, password } = req.body
-    const user = await User.findOne({ email })
-    if (!user) {
-      return next(handleError(404, 'Invalid login credential'));
-    }
-    const hashedPassword = user.password
+    const { email, password } = req.body;
 
-    const comparePassword = await bcryptjs.compare(password, hashedPassword)
-    if (!comparePassword) {
-      return next(handleError(404, 'Invalid login credential'));
-    }
+    const user = await User.findOne({ email });
+    if (!user) return next(handleError(404, "Invalid login credential"));
 
-    const token = jwt.sign({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      avatar: user.avatar,
-      role: user.role,
-    }, process.env.JWT_SECRET, { expiresIn: "7d" })
+    const isMatch = await bcryptjs.compare(password, user.password);
+    if (!isMatch) return next(handleError(401, "Invalid login credential"));
+
+    const token = generateToken(user);
+
     res.cookie("access_token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",       // false in dev
+      secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-    const newUser = user.toObject({ getters: true })
-    delete newUser.password
+
+    const userData = user.toObject({ getters: true });
+    delete userData.password;
+
     res.status(200).json({
       success: true,
-      user: newUser,
-      message: 'Login successfull'
-    })
+      user: userData,
+      token,
+      message: "Login successful",
+    });
   } catch (err) {
-    next(handleError(500, err.message))
+    next(handleError(500, err.message));
   }
-}
+};
 
+// --------------------- GOOGLE LOGIN ---------------------
 export const GoogleLogin = async (req, res, next) => {
   try {
-    const { name, email, avatar } = req.body
-    let user
-    user = await User.findOne({ email })
+    const { name, email, avatar } = req.body;
+
+    let user = await User.findOne({ email });
+
     if (!user) {
-      const password = Math.random().toString()
-      const hashedPassword = bcryptjs.hashSync(password)
-      const newUser = new User({
-        name, email, password: hashedPassword, avatar
-      })
-      user = await newUser.save()
+      const randomPassword = Math.random().toString(36).slice(-8);
+      const hashedPassword = bcryptjs.hashSync(randomPassword, 10);
+
+      user = await new User({
+        name,
+        email,
+        password: hashedPassword,
+        avatar,
+      }).save();
     }
 
+    const token = generateToken(user);
 
-    const token = jwt.sign({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      avatar: user.avatar,
-      role: user.role,
-    }, process.env.JWT_SECRET, { expiresIn: "7d" })
     res.cookie("access_token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",       // false in dev
+      secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-    const newUser = user.toObject({ getters: true })
-    delete newUser.password
+
+    const userData = user.toObject({ getters: true });
+    delete userData.password;
+
     res.status(200).json({
       success: true,
-      user: newUser,
-      message: 'Login successfull'
-    })
+      user: userData,
+      token,
+      message: "Google login successful",
+    });
   } catch (err) {
-    next(handleError(500, err.message))
+    next(handleError(500, err.message));
   }
-}
+};
 
+// --------------------- LOGOUT ---------------------
 export const Logout = async (req, res, next) => {
   try {
-    res.clearCookie('access_token', {
+    res.clearCookie("access_token", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      path: "/"
-    })
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      path: "/",
+    });
 
     res.status(200).json({
       success: true,
-      message: 'Logout successfull'
-    })
+      message: "Logout successful",
+    });
   } catch (err) {
-    next(handleError(500, err.message))
+    next(handleError(500, err.message));
   }
-}
-
+};

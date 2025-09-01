@@ -99,42 +99,120 @@ export const getMyLeaves = async (req, res) => {
   }
 };
 
-// /**
-//  * Optional: GET /api/leaves/:id
-//  * (useful for detail view)
-//  */
-// export const getLeaveById = async (req, res) => {
-//   try {
-//     const leave = await Leave.findById(req.params.id);
-//     if (!leave) return res.status(404).json({ message: "Leave not found" });
-//     return res.json({ leave });
-//   } catch (error) {
-//     console.error("getLeaveById error:", error);
-//     return res.status(500).json({ message: "Server error", error: error.message });
-//   }
-// };
+/**
+ * GET /api/leaves/admin-summary
+ * Returns stats and recent activity for all students (admin only).
+ */
+export const getAdminSummary = async (req, res) => {
+  try {
+    if (req.user?.role !== "admin") {
+      return res.status(403).json({ message: "Forbidden: Admins only" });
+    }
 
-// /**
-//  * Optional admin action: PATCH /api/leaves/:id/status
-//  * Body: { status: "Approved"|"Rejected", adminComment?: string }
-//  */
-// export const updateLeaveStatus = async (req, res) => {
-//   try {
-//     const { status, adminComment } = req.body;
-//     if (!["Approved", "Rejected", "Pending"].includes(status)) {
-//       return res.status(400).json({ message: "Invalid status" });
-//     }
+    const leaves = await Leave.find().sort({ createdAt: -1 });
 
-//     const leave = await Leave.findById(req.params.id);
-//     if (!leave) return res.status(404).json({ message: "Leave not found" });
+    const total = leaves.length;
+    const approved = leaves.filter(l => l.status === "Approved").length;
+    const pending = leaves.filter(l => l.status === "Pending").length;
+    const rejected = leaves.filter(l => l.status === "Rejected").length;
 
-//     leave.status = status;
-//     if (typeof adminComment !== "undefined") leave.adminComment = adminComment;
+    // Return all leaves instead of only 5
+    const recent = leaves.map(l => ({
+      _id: l._id,
+      studentId: l.studentId,
+      studentName: l.name,
+      leaveType: l.leaveType,
+      startDate: l.startDate,
+      endDate: l.endDate,
+      status: l.status,
+      createdAt: l.createdAt,
+    }));
 
-//     await leave.save();
-//     return res.json({ message: "Status updated", leave });
-//   } catch (error) {
-//     console.error("updateLeaveStatus error:", error);
-//     return res.status(500).json({ message: "Server error", error: error.message });
-//   }
-// };
+    return res.json({
+      stats: { total, approved, pending, rejected },
+      recent,
+    });
+  } catch (error) {
+    console.error("getAdminSummary error:", error);
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+
+export const updateLeaveStatus = async (req, res) => {
+  try {
+    const { leaveId } = req.params;
+    const { status } = req.body; // "Approved" or "Rejected"
+
+    if (!["Approved", "Rejected"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
+    }
+
+    const leave = await Leave.findByIdAndUpdate(
+      leaveId,
+      { status },
+      { new: true }
+    );
+
+    if (!leave) {
+      return res.status(404).json({ message: "Leave not found" });
+    }
+
+    res.json({ success: true, leave });
+  } catch (error) {
+    console.error("Error updating leave:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const getLeaveById = async (req, res) => {
+  try {
+    const leave = await Leave.findById(req.params.id)
+      .populate("studentId", "name email rollNo") // if you have relation
+      .lean();
+
+    if (!leave) {
+      return res.status(404).json({ message: "Leave request not found" });
+    }
+
+    res.json(leave);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+// ✅ Get all leaves (Admins only)
+export const getAllLeaves = async (req, res) => {
+  try {
+    // 🔐 Ensure only admins can access
+    if (!req.user || req.user.role !== "admin") {
+      return res.status(403).json({ message: "Forbidden: Admins only" });
+    }
+
+    // 📝 Optional filter by status
+    const { status } = req.query;
+    const filter = status ? { status } : {};
+
+    // 🔎 Fetch all leaves from DB
+    const leaves = await Leave.find(filter)
+      .populate("studentId", "name email roomNumber") // 👈 populate student info if needed
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // ✅ Return response
+    return res.status(200).json({
+      success: true,
+      count: leaves.length,
+      leaves,
+    });
+  } catch (error) {
+    console.error("❌ getAllLeaves error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while fetching leaves",
+      error: error.message,
+    });
+  }
+};

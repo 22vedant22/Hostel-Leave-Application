@@ -2,36 +2,58 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import SignupForm from "@/components/SignupForm";
-import Login from "@/components/Login";
 import Dashboard from "./pages/Dashboard";
-import ApplyLeave from "./pages/ApplyLeave"; // import ApplyLeave page
+import ApplyLeave from "./pages/ApplyLeave";
 import AuthLayout from "@/layouts/AuthLayout";
 import MainLayout from "@/layouts/MainLayout";
-import LeaveHistoryTimeline from "./pages/LeaveHistoryTimeline"; // import LeaveHistoryTable page
+import LeaveHistoryTimeline from "./pages/LeaveHistoryTimeline";
 import LeaveHistoryTable from "./pages/LeaveHistoryTable";
 import NotificationsPage from "./pages/NotificationsPage";
 import Profile from "./pages/Profile";
+import AdminLayout from "@/layouts/AdminLayout";
+import OnlyAdminAllowed from "@/components/OnlyAdminAllowed";
+import AdminDashboard from "./pages/AdminDashboard";
+import Login from "@/components/Login";
+import LeaveRequests from "./pages/LeaveRequests";
+import LeaveDetails from "./pages/LeaveDetails"
+import AdminNotify from "./pages/AdminNotify";
+import AdminProfile from "./pages/AdminProfile";
 // import ProfileSettingsPage from "./pages/ProfileSettingsPage";
-
+import AdminApprovedLeavesTable from "./components/AdminApprovedLeavesTable";
+import Settings from "./pages/Settings";
 
 export default function App() {
   return (
     <Routes>
-      {/* Pages WITH header + bg */}
+      {/* Public Auth Pages */}
       <Route element={<AuthLayout />}>
         <Route path="/" element={<SignupForm />} />
         <Route path="/login" element={<Login />} />
       </Route>
 
-      {/* Pages WITHOUT header + bg */}
+      {/* User Dashboard Pages */}
       <Route path="/dashboard" element={<MainLayout />}>
         <Route index element={<Dashboard />} />
-        <Route path="applyleave" element={<ApplyLeave />} /> {/* nested route */}
-        <Route path="timeline" element={<LeaveHistoryTimeline />} /> {/* nested route */}
-        <Route path="leavehistory" element={<LeaveHistoryTable />} /> {/* nested route */}
+        <Route path="applyleave" element={<ApplyLeave />} />
+        <Route path="timeline" element={<LeaveHistoryTimeline />} /> 
+        <Route path="leavehistory" element={<LeaveHistoryTable />} />
         <Route path="notifications" element={<NotificationsPage />} />
         <Route path="profile" element={<Profile />} />
         {/* <Route path="profile" element={<ProfileSettingsPage />} /> */}
+      </Route>
+
+      {/* Admin Pages (protected) */}
+      <Route element={<OnlyAdminAllowed />}>
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="leaverequests" element={<LeaveRequests />} />
+          <Route path="leave/:id" element={<LeaveDetails />} />
+          <Route path="adminnotify" element={<AdminNotify />} />
+          {/* <Route path="profile" element={<Profile />} /> */}
+          <Route path="adminprofile" element={<AdminProfile />} />
+          <Route path="adminleaves" element={<AdminApprovedLeavesTable />} />
+          <Route path="settings" element={<Settings />} />
+        </Route>
       </Route>
     </Routes>
   );
