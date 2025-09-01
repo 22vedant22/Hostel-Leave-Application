@@ -8,16 +8,43 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { FaHome, FaUsers } from "react-icons/fa"
 import { BiSolidCategory } from "react-icons/bi"
 import { FaComments } from "react-icons/fa6"
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
+import { removeUser } from "@/redux/user/user.slice"
+import { showToast } from "@/helpers/showToast"
+import { getEnv } from "@/helpers/getEnv"
 
 
 const AppSidebar = () => {
   const user = useSelector((state) => state.user)
-  
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const handleLogout = async() => {
+      try {
+          const response = await fetch(`${getEnv("VITE_API_URL")}/auth/logout`, {
+            method: "get",
+            credentials: "include", // important for cookie-based auth
+          });
+    
+          const data = await response.json();
+    
+          if (!response.ok) {
+            return showToast("error", data.message);
+          }
+    
+          // ✅ Save user in Redux
+          dispatch(removeUser());
+          navigate("/login");
+          // ✅ Show success message
+          showToast("success", data.message);
+        } catch (err) {
+          showToast("error", err.message || "Server error");
+        }
+  }
+
   return (
     <>
     
@@ -69,7 +96,8 @@ const AppSidebar = () => {
 
           {/* Logout */}
           <div className="pb-20 pt-20">
-            <button className="w-full bg-red-500 hover:bg-red-600 text-white py-2.5 rounded-full font-medium transition-colors duration-200">
+            <button onClick={handleLogout}
+            className="w-full bg-red-500 hover:bg-red-600 text-white py-2.5 rounded-full font-medium transition-colors duration-200">
               Log out
             </button>
           </div>
