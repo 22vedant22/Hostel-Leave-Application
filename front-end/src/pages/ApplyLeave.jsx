@@ -189,9 +189,14 @@ export default function ApplyLeaveForm() {
                           <SelectContent>
                             <SelectItem value="Sick Leave">Sick Leave</SelectItem>
                             <SelectItem value="Casual Leave">Casual Leave</SelectItem>
-                            <SelectItem value="Emergency Leave">
-                              Emergency Leave
-                            </SelectItem>
+                            <SelectItem value="Emergency Leave"> Emergency Leave</SelectItem>
+                            <SelectItem value="Medical Leave">Medical Leave</SelectItem>
+                            <SelectItem value="Family Function Leave">Family Function Leave</SelectItem>
+                            <SelectItem value="Vacation Leave">Vacation Leave</SelectItem>
+                            <SelectItem value="Festival Leave">Festival Leave</SelectItem>
+                            <SelectItem value="Examination Leave">Examination Leave</SelectItem>
+                            <SelectItem value="Personal Leave">Personal Leave</SelectItem>
+                            <SelectItem value="Official Leave">Official Leave</SelectItem>
                             <SelectItem value="Other">Other</SelectItem>
                           </SelectContent>
                         </Select>

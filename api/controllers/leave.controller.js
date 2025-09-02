@@ -216,3 +216,62 @@ export const getAllLeaves = async (req, res) => {
     });
   }
 };
+
+
+// GET /api/leaves/admin-analytics
+export const getAdminAnalytics = async (req, res) => {
+  try {
+    if (req.user?.role !== "admin") {
+      return res.status(403).json({ message: "Forbidden: Admins only" });
+    }
+
+    // 📊 Group by month (from createdAt)
+    const monthly = await Leave.aggregate([
+      {
+        $group: {
+          _id: { month: { $month: "$createdAt" } },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { "_id.month": 1 } },
+    ]);
+
+    // Format into array of 12 months
+    const months = Array(12).fill(0);
+    monthly.forEach((m) => {
+      months[m._id.month - 1] = m.count;
+    });
+
+    // 🥧 Leave Reasons
+    const reasons = await Leave.aggregate([
+      {
+        $group: {
+          _id: "$leaveType",
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { count: -1 } },
+    ]);
+
+    // 👩‍🎓 Top Students (by number of leaves)
+    const topStudents = await Leave.aggregate([
+      {
+        $group: {
+          _id: { studentId: "$studentId", name: "$name" },
+          leaveCount: { $sum: 1 },
+        },
+      },
+      { $sort: { leaveCount: -1 } },
+      { $limit: 5 },
+    ]);
+
+    return res.json({
+      monthlyRequests: months,
+      leaveReasons: reasons,
+      topStudents,
+    });
+  } catch (error) {
+    console.error("getAdminAnalytics error:", error.message, error.stack);
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+};

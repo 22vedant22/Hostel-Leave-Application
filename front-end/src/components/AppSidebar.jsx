@@ -73,6 +73,13 @@ const AppSidebar = () => {
 
               <SidebarMenuItem>
                 <SidebarMenuButton className="flex items-center gap-3 p-3 rounded-lg hover:bg-teal-50 text-gray-700 transition-colors duration-200">
+                  <FaComments className="text-teal-600 w-5 h-5" />
+                  <Link to="/admin/adminanalytics">Analytics</Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton className="flex items-center gap-3 p-3 rounded-lg hover:bg-teal-50 text-gray-700 transition-colors duration-200">
                   <FaUsers className="text-teal-600 w-5 h-5" />
                   <Link to="/admin/adminnotify">Notifications</Link>
                 </SidebarMenuButton>
