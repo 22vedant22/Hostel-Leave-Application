@@ -259,6 +259,7 @@ export const getAdminAnalytics = async (req, res) => {
         $group: {
           _id: { studentId: "$studentId", name: "$name" },
           leaveCount: { $sum: 1 },
+          leaveTypes: { $addToSet: "$leaveType" },
         },
       },
       { $sort: { leaveCount: -1 } },
@@ -273,5 +274,62 @@ export const getAdminAnalytics = async (req, res) => {
   } catch (error) {
     console.error("getAdminAnalytics error:", error.message, error.stack);
     return res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// controller/leaveController.js
+
+export const getStudentAnalytics = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+
+    // get student info from first leave record
+    const studentLeave = await Leave.findOne({ studentId });
+    if (!studentLeave) {
+      return res.status(404).json({ message: "Student not found or no leaves applied" });
+    }
+
+    // aggregate monthly requests
+    const monthlyRequests = await Leave.aggregate([
+      { $match: { studentId } },
+      {
+        $group: {
+          _id: { $month: "$startDate" },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { "_id": 1 } },
+    ]);
+
+    // prepare fixed-length (12 months) array
+    const monthlyData = Array(12).fill(0);
+    monthlyRequests.forEach((m) => {
+      monthlyData[m._id - 1] = m.count;
+    });
+
+    // aggregate reasons
+    const leaveReasons = await Leave.aggregate([
+      { $match: { studentId } },
+      {
+        $group: {
+          _id: "$leaveType",
+          count: { $sum: 1 },
+        },
+      },
+       { $sort: { count: -1 } },
+    ]);
+
+    res.json({
+      student: {
+        name: studentLeave.name,
+        rollNo: studentLeave.studentId,
+        roomNo: studentLeave.roomNumber,
+      },
+      monthlyRequests: monthlyData,
+      leaveReasons,
+    });
+  } catch (err) {
+    console.error("getStudentAnalytics error:", err);
+    res.status(500).json({ message: "Server error" });
   }
 };

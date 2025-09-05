@@ -12,11 +12,12 @@ import {
   Cell,
   LabelList,
 } from "recharts";
+import { useNavigate } from "react-router-dom";
 
 // --- Colors (Teal + Blue palette like in Figma) ---
 const COLORS = ["#0f766e", "#0891b2", "#0ea5e9", "#64748b"];
-
 const AdminAnalytics = () => {
+  const navigate = useNavigate();
   const [analytics, setAnalytics] = useState({
     monthlyRequests: [],
     leaveReasons: [],
@@ -57,10 +58,10 @@ const AdminAnalytics = () => {
   }));
 
   return (
-    <div className="p-6 bg-slate-50 min-h-screen font-sans">
+    <div className="bg-slate-50 min-h-screen font-sans pt-16 p-6">
       {/* --- Header --- */}
       <div>
-        <h1 className="text-3xl font-bold text-slate-800">Analytics</h1>
+        <h1 className="text-3xl font-bold text-slate-800 text-[#1B6A76]">Analytics</h1>
         <p className="text-slate-500 mt-1">Your student's leave history at a glance...</p>
       </div>
 
@@ -71,7 +72,7 @@ const AdminAnalytics = () => {
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
               {/* <CalendarIcon /> */}
-              <h2 className="text-xl font-semibold text-slate-700">Monthly Requests</h2>
+              <h2 className="text-xl font-semibold text-slate-700 text-[#1B6A76]">Monthly Requests</h2>
             </div>
             <div className="text-right">
               <p className="text-3xl font-bold text-slate-800">
@@ -100,7 +101,7 @@ const AdminAnalytics = () => {
         <section className="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm">
           <div className="flex items-center gap-3">
             {/* <ClockIcon /> */}
-            <h2 className="text-xl font-semibold text-slate-700">Leave Reasons</h2>
+            <h2 className="text-xl font-semibold text-slate-700 text-[#1B6A76]">Leave Reasons</h2>
           </div>
           <div className="mt-4 flex items-center justify-around h-72">
             <div className="w-1/2 h-full">
@@ -140,10 +141,11 @@ const AdminAnalytics = () => {
 
         {/* --- Card 3: Top Students --- */}
         <section className="lg:col-span-5 bg-white p-6 rounded-lg shadow-sm">
-          <h2 className="text-xl font-semibold text-slate-700">Top Students</h2>
+          <h2 className="text-xl font-semibold text-slate-700 text-[#1B6A76]">Top Students</h2>
           <div className="mt-4 flex justify-between px-4 pb-2 border-b text-sm font-medium text-slate-500">
             <span>Name</span>
             <span>Leave Count</span>
+             <span>Action</span>
           </div>
           <ul className="mt-2 space-y-1">
             {analytics.topStudents.map((s, index) => (
@@ -155,11 +157,21 @@ const AdminAnalytics = () => {
                   </div>
                   <div>
                     <p className="font-semibold text-slate-800">{s._id.name}</p>
-                    <p className="text-sm text-slate-500">{s._id.leaveType}</p>
+                    <p className="text-sm text-slate-500">{s.leaveTypes}</p>
                   </div>
+
                 </div>
+                  <div className=" justify-between items-center place-items-center">
+                    <span className="font-semibold text-slate-700 ">{s.leaveCount}</span>
+                  </div>
+                
                 <div className="flex items-center gap-12">
-                  <span className="font-semibold text-slate-700 pl-4">{s.leaveCount}</span>
+                  <button
+                    onClick={() => navigate(`/admin/student/${s._id.studentId}`)}
+                    className="px-4 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                  >
+                    View
+                  </button>
                 </div>
               </li>
             ))}
