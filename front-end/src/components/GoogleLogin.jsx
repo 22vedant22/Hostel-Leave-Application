@@ -1,5 +1,5 @@
 // src/pages/GoogleLogin.jsx
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "./ui/button";
 import { FcGoogle } from "react-icons/fc";
 import { signInWithPopup } from "firebase/auth";
@@ -9,12 +9,15 @@ import { getEnv } from "@/helpers/getEnv";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setUser } from "@/redux/user/user.slice";
+import { fi } from "date-fns/locale";
 
 const GoogleLogin = () => {
+  const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleLogin = async () => {
+    setLoading(true);
     try {
       const googleResponse = await signInWithPopup(auth, provider);
       const user = googleResponse.user
@@ -48,12 +51,16 @@ const GoogleLogin = () => {
     } catch (err) {
       showToast("error", err.message || "Server error");
     }
+    finally {
+      setLoading(false);    
+    }
   }
 
   return (
     <Button variant="outline" className="w-full flex items-center justify-center gap-2" onClick={handleLogin}>
       <FcGoogle />
-      Continue with Google
+    
+      {loading ? "Loading..." : "Continue with Google"}
     </Button>
   );
 };

@@ -1,5 +1,5 @@
 // src/pages/SignupForm.jsx
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import {
@@ -19,6 +19,7 @@ import { getEnv } from "@/helpers/getEnv";
 import GoogleLogin from "./GoogleLogin";
 
 const SignupForm = () => {
+    const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const formSchema = z.object({
@@ -39,6 +40,7 @@ const SignupForm = () => {
   });
 
   async function onSubmit(values){
+    setLoading(true);
     try {
       const response = await fetch(`${getEnv("VITE_API_URL")}/auth/register`, {
         method: "POST",
@@ -56,6 +58,9 @@ const SignupForm = () => {
       navigate("/login");
     } catch (err) {
       showToast("error", err.message || "Server error");
+    }
+    finally{
+      setLoading(false)
     }
   };
 
@@ -125,7 +130,8 @@ const SignupForm = () => {
             />
 
             <Button type="submit" className="w-full py-3 bg-[#006d77] text-white font-bold rounded-lg hover:bg-[#005962] transition mb-4">
-              Sign up
+             
+               {loading ? "Loading..." : " Sign up"}
             </Button>
           </form>
         </Form>

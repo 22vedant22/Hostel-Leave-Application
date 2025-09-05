@@ -13,7 +13,7 @@ const Topbar = () => {
         <div className="text-xl sm:text-2xl font-bold text-teal-700 flex items-center gap-2">
           <SiGooglehome className="w-6 h-6 sm:w-7 sm:h-7" />
           <span className="hidden sm:inline">Hostel Leave Application</span>
-          <span className="sm:hidden">HLA</span>
+          <span className="sm:hidden">Hostel Leave Application</span>
         </div>
 
         {/* Mobile Menu Button */}

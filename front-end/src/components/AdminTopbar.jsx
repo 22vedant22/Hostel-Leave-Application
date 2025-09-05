@@ -4,6 +4,7 @@ import { FaBars } from "react-icons/fa"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Link } from "react-router-dom"
 import { useSidebar } from "./ui/sidebar"
+import { SiGooglehome } from "react-icons/si"
 
 const Topbar = () => {
   const {toggleSidebar} = useSidebar()
@@ -18,7 +19,7 @@ const Topbar = () => {
         </button>
         {/* Logo + Text */}
         <div className="flex items-center gap-2">
-          <img src="/icon.png" alt="logo" className="w-8 h-8 sm:w-9 sm:h-9" />
+           <SiGooglehome className="w-6 h-6 sm:w-7 sm:h-7" />
           <h1 className="text-base sm:text-lg font-bold text-[#1b4d5e] truncate">
             Hostel Leave Management
           </h1>

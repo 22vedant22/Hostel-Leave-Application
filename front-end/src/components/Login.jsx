@@ -1,5 +1,5 @@
 // src/pages/Login.jsx
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import {
@@ -20,6 +20,7 @@ import { useDispatch } from "react-redux";
 import { setUser } from "@/redux/user/user.slice";
 
 const Login = () => {
+  const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -39,6 +40,7 @@ const Login = () => {
 
   // ✅ Handle submit
   async function onSubmit(values) {
+    setLoading(true);
     try {
       const response = await fetch(`${getEnv("VITE_API_URL")}/auth/login`, {
         method: "POST",
@@ -66,6 +68,9 @@ const Login = () => {
     } catch (err) {
       showToast("error", err.message || "Server error");
     }
+    finally {
+    setLoading(false);
+  }
   }
 
   return (
@@ -112,9 +117,6 @@ const Login = () => {
               <label className="flex items-center">
                 <input type="checkbox" className="mr-1" /> Remember me
               </label>
-              <a href="#" className="text-blue-600 hover:underline">
-                Forgot your password?
-              </a>
             </div>
 
             {/* Submit Button */}
@@ -122,7 +124,8 @@ const Login = () => {
               type="submit"
               className="w-full py-2 bg-[#125c60] text-white rounded-md font-bold mb-4 hover:bg-[#0f4a4d] transition"
             >
-              Sign in
+
+              {loading ? "Loading..." : " Sign in"}
             </button>
           </form>
         </Form>
