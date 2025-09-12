@@ -56,6 +56,14 @@ emergencyContactNumber: {
     type: String,
     trim: true
 },
+  resetToken:{
+    type: String, 
+    trim: true
+  },
+  resetTokenExpiry: {
+    type: Date,
+    trim: true
+  },
 });
 
 const User = mongoose.model("User", userSchema, "users");

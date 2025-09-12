@@ -129,7 +129,15 @@ const Login = () => {
             </button>
           </form>
         </Form>
-
+              <div className="text-xs mb-4">
+                Forget your password?{" "}
+          <Link
+            to="/forgot-password"
+            className="text-blue-600 hover:underline"
+          >
+            Forgot password?
+          </Link>
+        </div>
         {/* Signup Link */}
         <p className="text-xs mb-4">
           New to DormDash?{" "}

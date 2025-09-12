@@ -23,6 +23,8 @@ import AdminApprovedLeavesTable from "./components/AdminApprovedLeavesTable";
 import Settings from "./pages/Settings";
 import AdminAnalytics from "./components/AdminAnalytics";
 import StudentAnalytics from "./components/StudentAnalytics";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 export default function App() {
   return (
@@ -31,6 +33,8 @@ export default function App() {
       <Route element={<AuthLayout />}>
         <Route path="/" element={<SignupForm />} />
         <Route path="/login" element={<Login />} />
+         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
       </Route>
 
       {/* User Dashboard Pages */}
