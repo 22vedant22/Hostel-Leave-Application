@@ -16,9 +16,8 @@ const formatRelativeTime = (dateString) => {
   return `${diffInDays}d ago`;
 };
 
-
 export default function LeaveRequests() {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   const [filter, setFilter] = useState("All");
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -94,7 +93,7 @@ export default function LeaveRequests() {
     filter === "All"
       ? leaveRequests
       : filter === "Pending"
-      ? leaveRequests // show ALL students' leaves
+      ? leaveRequests
       : leaveRequests.filter((req) => req.status === filter);
 
   return (
@@ -139,15 +138,14 @@ export default function LeaveRequests() {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="border rounded-xl p-4 bg-white shadow-sm">
+      {/* Table - Hidden on small screens */}
+      <div className="hidden md:block border rounded-xl p-4 bg-white shadow-sm">
         <div className="grid grid-cols-4 text-sm font-semibold text-gray-600 border-b pb-2 mb-3">
           <span>Student</span>
           <span>Date Range</span>
           <span>Status / Action</span>
           <span className="text-right"> </span>
         </div>
-
         {loading ? (
           <p className="text-gray-500 text-center py-10">Loading...</p>
         ) : filteredRequests.length > 0 ? (
@@ -208,15 +206,93 @@ export default function LeaveRequests() {
 
                 {/* View + time */}
                 <div className="text-right">
-                  <button className="text-teal-600 font-medium hover:underline text-sm mr-3"
-                  onClick={() => navigate(`/admin/leave/${req._id}`)}
+                  <button
+                    className="text-teal-600 font-medium hover:underline text-sm mr-3"
+                    onClick={() => navigate(`/admin/leave/${req._id}`)}
                   >
-
                     View
                   </button>
                   <span className="text-xs text-gray-400">
                     {formatRelativeTime(req.createdAt)}
                   </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500 text-center py-10">
+            No leave requests found.
+          </p>
+        )}
+      </div>
+
+      {/* Mobile Card Layout - Hidden on larger screens */}
+      <div className="block md:hidden border rounded-xl p-4 bg-white shadow-sm">
+        {loading ? (
+          <p className="text-gray-500 text-center py-10">Loading...</p>
+        ) : filteredRequests.length > 0 ? (
+          <div className="space-y-4">
+            {filteredRequests.map((req) => (
+              <div
+                key={req._id}
+                className="p-4 border rounded-lg bg-gray-50"
+              >
+                {/* Student and Date */}
+                <div className="flex items-center gap-4 mb-2">
+                  <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center font-semibold text-teal-700">
+                    {req.studentName?.charAt(0) || "S"}
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-800">{req.studentName}</p>
+                    <p className="text-sm text-gray-500">
+                      {req.startDate} - {req.endDate}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Leave Type and Time */}
+                <div className="mb-2">
+                  <p className="text-sm text-gray-600 font-semibold">{req.leaveType}</p>
+                  <p className="text-xs text-gray-400">
+                    {formatRelativeTime(req.createdAt)}
+                  </p>
+                </div>
+
+                {/* Status and Actions */}
+                <div className="flex flex-wrap items-center gap-2 mt-4">
+                  <span
+                    className={`px-2 py-0.5 text-xs rounded-full font-medium ${
+                      req.status === "Approved"
+                        ? "bg-green-100 text-green-700"
+                        : req.status === "Rejected"
+                        ? "bg-red-100 text-red-700"
+                        : "bg-yellow-100 text-yellow-700"
+                    }`}
+                  >
+                    {req.status}
+                  </span>
+                  {req.status === "Pending" && (
+                    <>
+                      <button
+                        onClick={() => handleStatusUpdate(req._id, "Approved")}
+                        className="px-3 py-1 rounded-full text-white bg-green-600 hover:bg-green-700 text-xs font-medium"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        onClick={() => handleStatusUpdate(req._id, "Rejected")}
+                        className="px-3 py-1 rounded-full text-white bg-red-500 hover:bg-red-600 text-xs font-medium"
+                      >
+                        Reject
+                      </button>
+                    </>
+                  )}
+                  <button
+                    className="text-teal-600 font-medium hover:underline text-sm ml-auto"
+                    onClick={() => navigate(`/admin/leave/${req._id}`)}
+                  >
+                    View
+                  </button>
                 </div>
               </div>
             ))}

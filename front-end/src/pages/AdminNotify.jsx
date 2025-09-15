@@ -120,7 +120,7 @@ export default function AdminNotify() {
 
                     <div className="mt-5 flex-1 overflow-y-auto">
                         <Tabs value={tab} onValueChange={setTab} className="flex flex-col h-full">
-                            <TabsList className="grid grid-cols-5 rounded-2xl">
+                            <TabsList className="flex justify-around overflow-x-auto p-1 md:w-full md:mx-auto md:overflow-visible rounded-2xl gap-2">
                                 {statusTabs.map((s) => (
                                     <TabsTrigger key={s} value={s} className="rounded-xl data-[state=active]:shadow">{s}</TabsTrigger>
                                 ))}

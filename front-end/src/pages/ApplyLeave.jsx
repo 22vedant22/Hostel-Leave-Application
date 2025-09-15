@@ -1,5 +1,5 @@
 // src/pages/ApplyLeaveForm.jsx
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaCalendarAlt, FaCheck } from "react-icons/fa";
 import { useForm } from "react-hook-form";
@@ -25,6 +25,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { getEnv } from "@/helpers/getEnv";
 import { showToast } from "@/helpers/showToast";
+import { useFetch } from "@/hooks/useFetch";
+import { useSelector } from "react-redux";
 
 // Zod schema
 const leaveSchema = z
@@ -50,6 +52,13 @@ const leaveSchema = z
 
 export default function ApplyLeaveForm() {
   const navigate = useNavigate();
+  const user = useSelector((state) => state.user);
+
+  // ✅ Fetch logged-in user data
+  const { data: userData } = useFetch(
+    `${getEnv("VITE_API_URL")}/user/get-user/${user?.user?._id}`,
+    { method: "get", credentials: "include" }
+  );
 
   const form = useForm({
     resolver: zodResolver(leaveSchema),
@@ -66,6 +75,14 @@ export default function ApplyLeaveForm() {
     },
   });
 
+  // ✅ Pre-fill studentId & name once data is fetched
+  useEffect(() => {
+    if (userData?.success) {
+      form.setValue("studentId", userData.user._id);
+      form.setValue("name", userData.user.name);
+    }
+  }, [userData, form]);
+
   const onSubmit = async (values) => {
     try {
       const res = await fetch(`${getEnv("VITE_API_URL")}/leaves/apply`, {
@@ -75,12 +92,12 @@ export default function ApplyLeaveForm() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(values),
-        // ✅ send cookies with the request
       });
 
       const data = await res.json();
 
-      if (!res.ok) return showToast("error", data.message || "Failed to apply leave");
+      if (!res.ok)
+        return showToast("error", data.message || "Failed to apply leave");
 
       showToast("success", data.message || "Leave applied successfully");
       form.reset();
@@ -95,17 +112,16 @@ export default function ApplyLeaveForm() {
       <div className="max-w-6xl mx-auto">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-teal-700">Apply for a Leave</h1>
-          <p className="text-sm text-gray-500">Your leave application in one step</p>
+          <p className="text-sm text-gray-500">
+            Your leave application in one step
+          </p>
         </div>
 
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
           <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-6"
-            >
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Student ID */}
+                {/* Student ID (Auto-filled, read-only) */}
                 <FormField
                   control={form.control}
                   name="studentId"
@@ -116,9 +132,9 @@ export default function ApplyLeaveForm() {
                       </FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="e.g. 2023CS101"
                           {...field}
-                          className="mt-2 block w-full rounded-md px-4 py-3 bg-sky-50 placeholder-gray-400 outline-none border focus:ring-2 focus:ring-teal-200"
+                          readOnly
+                          className="mt-2 block w-full rounded-md px-4 py-3 bg-gray-100 placeholder-gray-400 outline-none border focus:ring-2 focus:ring-teal-200"
                         />
                       </FormControl>
                       <FormMessage className="mt-1 text-xs text-red-600" />
@@ -126,7 +142,7 @@ export default function ApplyLeaveForm() {
                   )}
                 />
 
-                {/* Name */}
+                {/* Name (Auto-filled, read-only) */}
                 <FormField
                   control={form.control}
                   name="name"
@@ -137,9 +153,9 @@ export default function ApplyLeaveForm() {
                       </FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Full name"
                           {...field}
-                          className="mt-2 block w-full rounded-md px-4 py-3 bg-sky-50 placeholder-gray-400 outline-none border focus:ring-2 focus:ring-teal-200"
+                          readOnly
+                          className="mt-2 block w-full rounded-md px-4 py-3 bg-gray-100 placeholder-gray-400 outline-none border focus:ring-2 focus:ring-teal-200"
                         />
                       </FormControl>
                       <FormMessage className="mt-1 text-xs text-red-600" />
@@ -177,22 +193,20 @@ export default function ApplyLeaveForm() {
                       <FormLabel className="text-xs font-medium text-gray-600">
                         Leave Type
                       </FormLabel>
-                      <FormControl>
+                      <FormControl className="mt-2">
                         <Select
                           value={field.value}
                           onValueChange={field.onChange}
-                          className="mt-2"
                         >
-                          <SelectTrigger>
+                          <SelectTrigger className="w-full rounded-md px-4 py-3 bg-sky-50 placeholder-gray-400 outline-none border focus:ring-2 focus:ring-teal-200">
                             <SelectValue placeholder="Choose leave type" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="Sick Leave">Sick Leave</SelectItem>
                             <SelectItem value="Casual Leave">Casual Leave</SelectItem>
-                            <SelectItem value="Emergency Leave"> Emergency Leave</SelectItem>
-                            <SelectItem value="Medical Leave">Medical Leave</SelectItem>
-                            <SelectItem value="Family Function Leave">Family Function Leave</SelectItem>
+                            <SelectItem value="Emergency Leave">Emergency Leave</SelectItem>
                             <SelectItem value="Vacation Leave">Vacation Leave</SelectItem>
+                            <SelectItem value="Family Function Leave">Family Function Leave</SelectItem>
                             <SelectItem value="Festival Leave">Festival Leave</SelectItem>
                             <SelectItem value="Examination Leave">Examination Leave</SelectItem>
                             <SelectItem value="Personal Leave">Personal Leave</SelectItem>
@@ -250,8 +264,8 @@ export default function ApplyLeaveForm() {
                 />
               </div>
 
+              {/* Start & End Dates */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Start Date */}
                 <FormField
                   control={form.control}
                   name="startDate"
@@ -274,8 +288,6 @@ export default function ApplyLeaveForm() {
                     </FormItem>
                   )}
                 />
-
-                {/* End Date */}
                 <FormField
                   control={form.control}
                   name="endDate"
@@ -307,7 +319,7 @@ export default function ApplyLeaveForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-xs font-medium text-gray-600">
-                      Reason of Leave
+                      Reason for Leave
                     </FormLabel>
                     <FormControl>
                       <Textarea

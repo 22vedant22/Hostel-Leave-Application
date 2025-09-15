@@ -115,7 +115,7 @@ const Profile = () => {
             )}
           </Dropzone>
           <h2 className="text-xl font-semibold mt-4">{userData?.user?.name}</h2>
-          <p className="text-gray-500 text-sm">Student ID : {userData?.user?.studentId}</p>
+          <p className="text-gray-500 text-sm">Student ID : {userData?.user?._id}</p>
         </div>
       </CardHeader>
 

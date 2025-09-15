@@ -1,13 +1,14 @@
 // src/layouts/AuthLayout.jsx
 import React from "react";
 import { Outlet } from "react-router-dom";
+import { MdOutlineMapsHomeWork } from "react-icons/md";
 
 const AuthLayout = () => {
   return (
     <div className="relative min-h-screen w-full bg-[url('/bg.jpg')] bg-cover bg-center bg-no-repeat">
       <header className="absolute top-0 left-0 w-full bg-white shadow px-6 py-3 flex justify-between items-center z-10">
         <div className="flex items-center gap-2 text-[#1b4d5e] font-semibold">
-          <img src="/icon.png" alt="icon" className="w-6 h-6 object-contain" />
+          <MdOutlineMapsHomeWork/>
           <span>Hostel Leave Management</span>
         </div>
         <div className="flex items-center gap-2 text-[#1b4d5e] font-semibold">
