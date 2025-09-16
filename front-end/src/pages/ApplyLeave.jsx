@@ -80,6 +80,8 @@ export default function ApplyLeaveForm() {
     if (userData?.success) {
       form.setValue("studentId", userData.user._id);
       form.setValue("name", userData.user.name);
+      form.setValue("roomNumber", userData.user.roomNumber || "");
+      form.setValue("contactNumber", userData.user.phone || "");
     }
   }, [userData, form]);
 

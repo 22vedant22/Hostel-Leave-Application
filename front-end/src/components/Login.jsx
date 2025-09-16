@@ -18,9 +18,12 @@ import { getEnv } from "@/helpers/getEnv";
 import GoogleLogin from "./GoogleLogin";
 import { useDispatch } from "react-redux";
 import { setUser } from "@/redux/user/user.slice";
+import ProfilePopup from "@/components/ProfilePopup";
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
+  const [showProfilePopup, setShowProfilePopup] = useState(false);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -46,7 +49,7 @@ const Login = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
-        credentials: "include", // important for cookie-based auth
+        credentials: "include", // cookie-based auth
       });
 
       const data = await response.json();
@@ -57,20 +60,27 @@ const Login = () => {
 
       // ✅ Save user in Redux
       dispatch(setUser(data.user));
-      // ✅ Navigate based on role
+
       if (data.user.role === "admin") {
+        // Admin → straight to admin dashboard
         navigate("/admin");
       } else {
-        navigate("/dashboard");
+        // Normal user
+        if (!data.user.roomNumber || !data.user.phoneNumber) {
+          // Profile incomplete → open popup
+          setShowProfilePopup(true);
+        } else {
+          // Profile complete → straight to dashboard
+          navigate("/dashboard");
+        }
       }
 
       showToast("success", data.message);
     } catch (err) {
       showToast("error", err.message || "Server error");
+    } finally {
+      setLoading(false);
     }
-    finally {
-    setLoading(false);
-  }
   }
 
   return (
@@ -124,20 +134,18 @@ const Login = () => {
               type="submit"
               className="w-full py-2 bg-[#125c60] text-white rounded-md font-bold mb-4 hover:bg-[#0f4a4d] transition"
             >
-
-              {loading ? "Loading..." : " Sign in"}
+              {loading ? "Loading..." : "Sign in"}
             </button>
           </form>
         </Form>
-              <div className="text-xs mb-4">
-                Forget your password?{" "}
-          <Link
-            to="/forgot-password"
-            className="text-blue-600 hover:underline"
-          >
+
+        <div className="text-xs mb-4">
+          Forget your password?{" "}
+          <Link to="/forgot-password" className="text-blue-600 hover:underline">
             Forgot password?
           </Link>
         </div>
+
         {/* Signup Link */}
         <p className="text-xs mb-4">
           New to DormDash?{" "}
@@ -154,6 +162,16 @@ const Login = () => {
         {/* Google Login */}
         <GoogleLogin />
       </div>
+
+      {/* ✅ Profile Popup (only for normal users) */}
+      {showProfilePopup && (
+        <ProfilePopup
+          onClose={() => {
+            setShowProfilePopup(false);
+            navigate("/dashboard");
+          }}
+        />
+      )}
     </div>
   );
 };

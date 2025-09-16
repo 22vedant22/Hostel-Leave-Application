@@ -24,6 +24,10 @@ const userSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
+  roomNumber: {
+    type: String,
+    trim: true,
+  },
   phone: {
     type: String,
     trim: true,

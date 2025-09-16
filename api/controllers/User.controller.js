@@ -17,7 +17,7 @@ export const getUser = async (req, res, next) => {
 
 
         const user = await User.findById(userid)
-            .select("name email avatar") // keep it minimal for prefill
+            .select("name email avatar roomNumber phone") // keep it minimal for prefill
             .lean()
             .exec();
 
@@ -111,4 +111,32 @@ export const getMe = async (req, res, next) => {
     } catch (error) {
         next(handleError(500, error.message));
     }
+};
+
+// userController.js
+
+export const completeProfile = async (req, res, next) => {
+  try {
+    const userId = req.user?._id; // set by auth middleware
+    if (!userId) return next(handleError(401, "Unauthorized"));
+
+    const { roomNumber, phoneNumber } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) return next(handleError(404, "User not found"));
+
+    // Update fields
+    user.roomNumber = roomNumber ?? user.roomNumber;
+    user.phone = phoneNumber ?? user.phone;
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      user,
+    });
+  } catch (err) {
+    next(handleError(500, err.message));
+  }
 };
