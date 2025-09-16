@@ -110,9 +110,12 @@ const Topbar = () => {
           <Link to="/dashboard/profile" onClick={() => setMenuOpen(false)}>
             <li className="hover:text-teal-600 transition">Profile</li>
           </Link>
-          <li>
-            <FaUserCircle className="text-2xl text-orange-500 cursor-pointer hover:opacity-80 transition" />
-          </li>
+         <div >
+            <button onClick={handleLogout}
+            className="bg-red-500 hover:bg-red-600 text-white rounded-full font-medium transition-colors duration-200 px-4 py-2.5">
+              Log out
+            </button>
+          </div>
         </ul>
       )}
     </header>
